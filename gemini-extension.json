@@ -1,0 +1,11 @@
+{
+  "name": "peoples-court",
+  "version": "0.1.0",
+  "contextFileName": "GEMINI.md",
+  "mcpServers": {
+    "peoples-court": {
+      "url": "https://mcp.peoplescourt.ai/mcp",
+      "type": "http"
+    }
+  }
+}
