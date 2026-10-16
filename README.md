@@ -14,7 +14,12 @@ Support: contact@peoplescourt.ai.
 
 This package targets Gemini CLI `0.64.0` and uses `url` with `type: "http"` for Streamable HTTP.
 Gemini CLI supports OAuth discovery from the service’s authentication response and metadata.
-This draft relies on that discovery rather than embedding client credentials, scopes, or authorization endpoints.
+This draft discovers endpoints and pins the requested scope to `cases:read`, without embedding client credentials.
+It sets `oauth.enabled` to `false` to disable the CLI’s automatic initial-authentication branch; the intended initial grant uses `/mcp auth peoples-court` explicitly.
+In pinned `0.64.0`, the explicit command passes configured scopes to the OAuth provider and its discovery merge preserves them.
+Automatic authentication takes scopes from authorization-server metadata instead, so enabling it is not an equivalent least-privilege configuration.
+This initial-auth behavior is source-inspected and package-validated; no live authorization grant has verified it.
+Authenticated testing is on hold pending review of the stored-token SDK reauthorization path described below.
 Availability of a compatible registration method, loopback callback, scope grant, and issuer response remains to be verified in the actual Gemini CLI host.
 OAuth sign-in grants account access within approved scopes; it does not accept arbitration or authorize a fee.
 Each person must personally accept their exact filing or Answer packet on People’s Court.
@@ -26,7 +31,7 @@ Context instructions supplement service authorization; they are not a technical 
 
 The local extension link and terminal `gemini mcp list` were run in a dedicated empty temporary workspace with an isolated `GEMINI_CLI_HOME`.
 The person testing their own account must still complete authenticated verification.
-Review and complete the browser authorization yourself when testing.
+Only after the SDK scope blocker below is resolved, review and complete browser authorization yourself during an explicitly authorized test.
 For the local package layout below, run from the parent of the `peoples-court` directory.
 For a repository checkout, name the checkout directory `peoples-court` to match the manifest name, or substitute its absolute path:
 
@@ -35,8 +40,15 @@ gemini extensions link ./peoples-court
 ```
 
 Restart Gemini CLI and inspect `/extensions list` and `/mcp list`.
-If authentication is required, the person can initiate `/mcp auth peoples-court` and review the browser authorization screen.
+Do not run `/mcp auth peoples-court` until the SDK scope blocker below is resolved.
+That command is documented here only as a future manual-auth reference, not an instruction to authorize now.
 Verify read-only tool discovery and an authorized read on the person’s own account before considering any write workflow.
+The intended initial manual authorization requests `cases:read` only.
+This does not establish a complete scope boundary for stored-token reuse or reauthorization.
+Filing or other writes require a separately reviewed configuration with only the exact required scopes and a separate, personally approved grant, preferably in a distinct isolated profile.
+An existing read grant does not expand when a configuration file changes.
+Automatic scope step-up and write workflows have not been established for this package.
+Keep automatic authentication disabled; do not select all advertised API scopes.
 Any filing, declaration, consent, payment, or case action retains its separate personal-authority requirements.
 Do not use consent-skipping or automatic-approval flags.
 
@@ -77,3 +89,25 @@ The command ran without model authentication; no model sign-in or model prompt w
 The [pinned status-command implementation](https://github.com/google-gemini/gemini-cli/blob/v0.64.0/packages/cli/src/commands/mcp/list.ts) attempts MCP connection and optional ping, not `tools/list`.
 These results establish local package validation and host configuration recognition, not a successful service connection, authenticated compatibility or gallery acceptance.
 OAuth authorization, authenticated tool discovery, account reads, token refresh and revocation, personal acceptance and case workflows remain untested.
+
+## Least-privilege source record
+
+The [manual auth command](https://github.com/google-gemini/gemini-cli/blob/v0.64.0/packages/cli/src/ui/commands/mcpCommand.ts#L118) passes the configured OAuth object to the provider.
+The provider preserves explicit scopes in both [challenge discovery](https://github.com/google-gemini/gemini-cli/blob/v0.64.0/packages/core/src/mcp/oauth-provider.ts#L340) and [standard discovery](https://github.com/google-gemini/gemini-cli/blob/v0.64.0/packages/core/src/mcp/oauth-provider.ts#L376).
+The [connection path](https://github.com/google-gemini/gemini-cli/blob/v0.64.0/packages/core/src/tools/mcp-client.ts#L1989) refuses automatic authentication when `oauth.enabled` is false.
+The [automatic-auth path](https://github.com/google-gemini/gemini-cli/blob/v0.64.0/packages/core/src/tools/mcp-client.ts#L948) otherwise uses discovered scopes instead of the configured scope list.
+The authorization server advertises scopes beyond the MCP resource, including fee authority; these are not requested by this manual read-only configuration.
+The previous link/status probe preceded this scope restriction; it reported Disconnected and created no grant.
+The restricted candidate has passed CLI package validation only; its live grant, tool authorization and reauthentication behavior remain untested.
+
+## Stored-token limitation
+
+`oauth.enabled: false` does not block reuse of a stored token.
+The pinned [transport code](https://github.com/google-gemini/gemini-cli/blob/v0.64.0/packages/core/src/tools/mcp-client.ts#L2302) selects the stored-token provider when credentials exist.
+The [stored-token provider](https://github.com/google-gemini/gemini-cli/blob/v0.64.0/packages/core/src/mcp/stored-token-provider.ts#L53) uses the saved token and the [refresh helper](https://github.com/google-gemini/gemini-cli/blob/v0.64.0/packages/core/src/mcp/oauth-provider.ts#L695) uses its saved client and token endpoint without repeating metadata discovery.
+An ordinary refresh omits a new scope request when automatic authentication is disabled.
+However, a subsequent HTTP authentication challenge can enter the underlying MCP SDK’s separate reauthorization path, whose provider does not preserve the configured scope cap or persisted client identity.
+That SDK path can attempt new client registration and derive authorization scopes from resource metadata.
+This configuration is therefore a restricted initial-auth candidate, not a proven end-to-end scope boundary.
+Do not initiate a live grant or treat reauthorization as verified until that path is independently resolved or a bounded diagnostic avoids it.
+An offline, network-disabled probe of the pinned authorization-URL builder serialized exactly `cases:read` with S256 PKCE; it did not register a client, create a grant, or exercise that reauthorization path.

@@ -5,7 +5,13 @@
   "mcpServers": {
     "peoples-court": {
       "url": "https://mcp.peoplescourt.ai/mcp",
-      "type": "http"
+      "type": "http",
+      "oauth": {
+        "enabled": false,
+        "scopes": [
+          "cases:read"
+        ]
+      }
     }
   }
 }

@@ -1,6 +1,11 @@
 # People’s Court
 
 Use this connection only for the signed-in person’s authorized People’s Court work and the tools the service actually exposes.
+The intended initial manual OAuth grant requests only `cases:read`; automatic initial authentication is disabled.
+Live authorization is on hold pending review of the stored-token SDK reauthorization path.
+Do not initiate authentication or infer that the configuration enforces a complete scope boundary.
+Do not change the scope configuration or initiate a broader grant on the person’s behalf.
+Writes require a separately reviewed configuration and an explicitly authorized, separately reviewed grant; no automatic step-up is established.
 Connection or OAuth approval does not accept arbitration or authorize spending.
 Never ask for tokens, API keys, private keys, or payment credentials in conversation.
 
