@@ -19,7 +19,8 @@ It sets `oauth.enabled` to `false` to disable the CLI’s automatic initial-auth
 In pinned `0.64.0`, the explicit command passes configured scopes to the OAuth provider and its discovery merge preserves them.
 Automatic authentication takes scopes from authorization-server metadata instead, so enabling it is not an equivalent least-privilege configuration.
 This initial-auth behavior is source-inspected and package-validated; no live authorization grant has verified it.
-Authenticated testing is on hold pending review of the stored-token SDK reauthorization path described below.
+An initial manual read-only test may proceed in a fresh isolated profile after the person reviews the exact account, client recipient, `cases:read` scope and grant duration.
+Do not approve a broader scope or an unexpected registration or authentication challenge.
 Availability of a compatible registration method, loopback callback, scope grant, and issuer response remains to be verified in the actual Gemini CLI host.
 OAuth sign-in grants account access within approved scopes; it does not accept arbitration or authorize a fee.
 Each person must personally accept their exact filing or Answer packet on People’s Court.
@@ -31,7 +32,7 @@ Context instructions supplement service authorization; they are not a technical 
 
 The local extension link and terminal `gemini mcp list` were run in a dedicated empty temporary workspace with an isolated `GEMINI_CLI_HOME`.
 The person testing their own account must still complete authenticated verification.
-Only after the SDK scope blocker below is resolved, review and complete browser authorization yourself during an explicitly authorized test.
+For an explicitly authorized initial read-only test, personally review the browser consent details before granting access; keep subsequent reauthorization testing separate.
 For the local package layout below, run from the parent of the `peoples-court` directory.
 For a repository checkout, name the checkout directory `peoples-court` to match the manifest name, or substitute its absolute path:
 
@@ -40,8 +41,8 @@ gemini extensions link ./peoples-court
 ```
 
 Restart Gemini CLI and inspect `/extensions list` and `/mcp list`.
-Do not run `/mcp auth peoples-court` until the SDK scope blocker below is resolved.
-That command is documented here only as a future manual-auth reference, not an instruction to authorize now.
+After the exact test account, client recipient, `cases:read` scope and grant duration have been reviewed, the person may initiate `/mcp auth peoples-court` for the bounded initial test.
+Stop if the requested access or registration differs from that reviewed test.
 Verify read-only tool discovery and an authorized read on the person’s own account before considering any write workflow.
 The intended initial manual authorization requests `cases:read` only.
 This does not establish a complete scope boundary for stored-token reuse or reauthorization.
@@ -85,10 +86,10 @@ The follow-up isolated host probe approved workspace trust only for its dedicate
 `gemini extensions link <package-directory>` reported that `peoples-court` was linked successfully and enabled.
 `gemini mcp list` recognized `https://mcp.peoplescourt.ai/mcp` as an HTTP server from the extension and reported **Disconnected**, with command exit status 0.
 The normal command output did not expose the connection failure reason.
-The command ran without model authentication; no model sign-in or model prompt was attempted.
+That earlier status probe ran without model authentication; it attempted no model sign-in or model prompt.
 The [pinned status-command implementation](https://github.com/google-gemini/gemini-cli/blob/v0.64.0/packages/cli/src/commands/mcp/list.ts) attempts MCP connection and optional ping, not `tools/list`.
 These results establish local package validation and host configuration recognition, not a successful service connection, authenticated compatibility or gallery acceptance.
-OAuth authorization, authenticated tool discovery, account reads, token refresh and revocation, personal acceptance and case workflows remain untested.
+People’s Court OAuth authorization, authenticated tool discovery, account reads, token refresh and revocation, personal acceptance and case workflows remain untested.
 
 ## Least-privilege source record
 
@@ -107,7 +108,24 @@ The pinned [transport code](https://github.com/google-gemini/gemini-cli/blob/v0.
 The [stored-token provider](https://github.com/google-gemini/gemini-cli/blob/v0.64.0/packages/core/src/mcp/stored-token-provider.ts#L53) uses the saved token and the [refresh helper](https://github.com/google-gemini/gemini-cli/blob/v0.64.0/packages/core/src/mcp/oauth-provider.ts#L695) uses its saved client and token endpoint without repeating metadata discovery.
 An ordinary refresh omits a new scope request when automatic authentication is disabled.
 However, a subsequent HTTP authentication challenge can enter the underlying MCP SDK’s separate reauthorization path, whose provider does not preserve the configured scope cap or persisted client identity.
-That SDK path can attempt new client registration and derive authorization scopes from resource metadata.
-This configuration is therefore a restricted initial-auth candidate, not a proven end-to-end scope boundary.
-Do not initiate a live grant or treat reauthorization as verified until that path is independently resolved or a bounded diagnostic avoids it.
+That SDK path can attempt new client registration and construct an authorization URL using scopes from resource metadata.
+The actual CLI bundle’s stored-token provider implements `redirectToAuthorization` and `saveTokens` as no-ops and supplies no callback URL, so this path cannot open a browser or complete a broader authorization grant.
+The observed offline result is a possible registration attempt followed by unusable reauthorization, not automatic expansion of approved access.
+A registration’s supported-scope ceiling is distinct from the scopes a person approves for a grant; a broader ceiling does not itself create a broader grant.
+Initial manual `cases:read` testing remains conditional on the personal consent review above.
+Reauthorization failure, refresh and revocation remain live-test limitations; stop at an unexpected challenge or registration and do not infer a complete end-to-end scope boundary.
 An offline, network-disabled probe of the pinned authorization-URL builder serialized exactly `cases:read` with S256 PKCE; it did not register a client, create a grant, or exercise that reauthorization path.
+
+## Interactive model-access test
+
+On October 16, 2026, an actual official Gemini CLI `0.64.0` session was started in a fresh empty isolated workspace/profile, with no MCP server configured and telemetry disabled.
+The person selected their Google account and completed browser OAuth.
+The CLI then rejected eligibility with: “This client is no longer supported for Gemini Code Assist for individuals” and directed migration to Antigravity.
+The session showed zero tool calls, zero agent activity and zero model API calls; no model prompt or People’s Court grant was submitted.
+This is a host model-access eligibility block before connector testing, not a People’s Court connection failure.
+
+Google’s [consumer deprecation notice](https://developers.google.com/gemini-code-assist/docs/deprecations/code-assist-individuals?hl=en), updated October 9, 2026, says consumer-tier CLI service via Google login ended June 18, 2026.
+The generic [CLI authentication guide](https://geminicli.com/docs/get-started/authentication/) still recommends individual Google login, so those official pages conflict on that route; the observed rejection matches the specific deprecation notice.
+The documented Gemini API-key route remains a pending alternative, not a tested success or a promise of free usage.
+AI Studio’s initial terms screen remains unaccepted for personal review; no new project, API key or billing enrollment was created in this test.
+No gallery topic or GitHub Release has been enabled.

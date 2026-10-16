@@ -2,8 +2,10 @@
 
 Use this connection only for the signed-in person’s authorized People’s Court work and the tools the service actually exposes.
 The intended initial manual OAuth grant requests only `cases:read`; automatic initial authentication is disabled.
-Live authorization is on hold pending review of the stored-token SDK reauthorization path.
-Do not initiate authentication or infer that the configuration enforces a complete scope boundary.
+An initial manual read-only test is permitted only in a fresh isolated profile after the person reviews the exact account, client recipient, `cases:read` scope and grant duration.
+The person must personally approve the matching browser consent; stop on broader access or unexpected registration or authentication challenges.
+Do not infer that the configuration enforces a complete scope boundary or that automatic reauthorization works.
+The stored-token SDK may attempt registration and fail reauthorization; its no-op redirect and token-save hooks cannot complete a broader grant.
 Do not change the scope configuration or initiate a broader grant on the person’s behalf.
 Writes require a separately reviewed configuration and an explicitly authorized, separately reviewed grant; no automatic step-up is established.
 Connection or OAuth approval does not accept arbitration or authorize spending.
