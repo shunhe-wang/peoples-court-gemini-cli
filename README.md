@@ -2,7 +2,7 @@
 
 **Experimental draft configuration - October 16, 2026.**
 People’s Court is provided by Epistemic Labs Inc.
-This extension connects Gemini CLI to the existing hosted MCP service at `https://mcp.peoplescourt.ai/mcp`.
+This extension configures Gemini CLI to use the existing hosted MCP service at `https://mcp.peoplescourt.ai/mcp`.
 It contains configuration and workflow context, with no executable code, dependencies, embedded credentials, or new service capabilities.
 This source package is intended for an experimental public configuration repository.
 It is not a consumer Gemini app listing or a tested gallery release.
@@ -22,9 +22,10 @@ Fees are completed by the person through People’s Court; this extension’s co
 Review the service’s privacy notice and the assistant provider’s terms before sharing case information.
 Context instructions supplement service authorization; they are not a technical access-control mechanism.
 
-## Future local verification
+## Local setup and remaining verification
 
-These connection commands have not been run.
+The local extension link and terminal `gemini mcp list` were run in a dedicated empty temporary workspace with an isolated `GEMINI_CLI_HOME`.
+The person testing their own account must still complete authenticated verification.
 Review and complete the browser authorization yourself when testing.
 For the local package layout below, run from the parent of the `peoples-court` directory.
 For a repository checkout, name the checkout directory `peoples-court` to match the manifest name, or substitute its absolute path:
@@ -50,7 +51,8 @@ Repository ownership and publication are separate release actions.
 For a later gallery release, keep `gemini-extension.json` at the public repository’s absolute root and add the `gemini-cli-extension` topic only after authenticated host verification.
 The official gallery discovers tagged repositories and validates them; discovery is not a promise of acceptance or timing.
 After authenticated host verification and release approval, a GitHub Release may distribute the supplied ZIP as a generic platform-independent asset, with the manifest at archive root and a release tag matching version `0.1.0`.
-No repository, release, signup, terms acceptance, submission, host link, or OAuth grant was created by the package-validation step.
+The experimental public source repository is [shunhe-wang/peoples-court-gemini-cli](https://github.com/shunhe-wang/peoples-court-gemini-cli).
+No GitHub Release, gallery topic, signup, service terms acceptance, gallery submission or OAuth grant was created during package preparation and the isolated host probe.
 
 ## Source and verification record
 
@@ -67,5 +69,11 @@ Gemini CLI `0.64.0` was installed from the official `@google/gemini-cli` npm pac
 `gemini --version` returned `0.64.0`.
 `gemini extensions validate <package-directory>` completed successfully with exit status 0 using an isolated `GEMINI_CLI_HOME`.
 JSON syntax, package directory/name, context presence, and ZIP contents were also checked.
-This demonstrates local CLI package validation, not a successful service connection or gallery acceptance.
-Actual linking, sign-in, OAuth discovery, registration, consent, callback, refresh, revocation, tool discovery and case workflows have not been run.
+The follow-up isolated host probe approved workspace trust only for its dedicated empty workspace and the reviewed configuration extension.
+`gemini extensions link <package-directory>` reported that `peoples-court` was linked successfully and enabled.
+`gemini mcp list` recognized `https://mcp.peoplescourt.ai/mcp` as an HTTP server from the extension and reported **Disconnected**, with command exit status 0.
+The normal command output did not expose the connection failure reason.
+The command ran without model authentication; no model sign-in or model prompt was attempted.
+The [pinned status-command implementation](https://github.com/google-gemini/gemini-cli/blob/v0.64.0/packages/cli/src/commands/mcp/list.ts) attempts MCP connection and optional ping, not `tools/list`.
+These results establish local package validation and host configuration recognition, not a successful service connection, authenticated compatibility or gallery acceptance.
+OAuth authorization, authenticated tool discovery, account reads, token refresh and revocation, personal acceptance and case workflows remain untested.
